@@ -57,6 +57,7 @@ from src.menus import (
     bonuses_menu_command, bonuses_menu_callback,
     leaderboard_menu_command, leaderboard_menu_callback
 )
+from src.menus.deposit_menu import deposit_message_handler
 
 # Load environment variables
 load_dotenv()

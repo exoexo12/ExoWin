@@ -286,9 +286,23 @@ nowpayments_client = NOWPaymentsAPI()
 
 # Helper functions for common operations
 async def get_api_status():
-    """Check if the NOWPayments API is operational"""
-    status = await nowpayments_client.get_status()
-    return status
+    """Check if the NOWPayments API is operational with enhanced logging"""
+    logger.debug("Checking NOWPayments API status")
+    
+    try:
+        status = await nowpayments_client.get_status()
+        
+        if status:
+            api_message = status.get("message", "unknown")
+            logger.info(f"NOWPayments API status: {api_message}")
+        else:
+            logger.warning("NOWPayments API status check returned None")
+        
+        return status
+        
+    except Exception as e:
+        logger.error(f"Error checking NOWPayments API status: {str(e)}", exc_info=True)
+        return None
 
 async def get_crypto_price(crypto_currency, fiat_currency="USD"):
     """Get the current price of a cryptocurrency in USD"""
@@ -296,19 +310,31 @@ async def get_crypto_price(crypto_currency, fiat_currency="USD"):
     return rate
 
 async def create_deposit_payment(user_id, amount_usd, crypto_currency=None):
-    """Create a direct payment for a user"""
+    """Create a direct payment for a user with enhanced logging"""
     order_id = f"deposit_{user_id}_{datetime.now().timestamp()}"
-    order_description = f"Deposit {amount_usd} USD to Gamble Bot wallet"
+    order_description = f"Deposit {amount_usd} USD to ExoWin Bot wallet"
     
-    payment = await nowpayments_client.create_payment(
-        price_amount=amount_usd,
-        price_currency="USD",
-        pay_currency=crypto_currency,
-        order_id=order_id,
-        order_description=order_description
-    )
+    logger.info(f"Creating payment for user {user_id}: ${amount_usd} USD in {crypto_currency}")
     
-    return payment
+    try:
+        payment = await nowpayments_client.create_payment(
+            price_amount=amount_usd,
+            price_currency="USD",
+            pay_currency=crypto_currency,
+            order_id=order_id,
+            order_description=order_description
+        )
+        
+        if payment:
+            logger.info(f"Payment created successfully: {payment.get('payment_id', 'unknown_id')}")
+        else:
+            logger.error(f"Payment creation returned None for user {user_id}")
+        
+        return payment
+        
+    except Exception as e:
+        logger.error(f"Error creating payment for user {user_id}: {str(e)}", exc_info=True)
+        return None
 
 async def create_deposit_invoice(user_id, amount_usd):
     """Create a multi-currency invoice for a user"""
@@ -325,9 +351,23 @@ async def create_deposit_invoice(user_id, amount_usd):
     return invoice
 
 async def check_payment_status(payment_id):
-    """Check the status of a payment"""
-    status = await nowpayments_client.get_payment_status(payment_id)
-    return status
+    """Check the status of a payment with enhanced logging"""
+    logger.debug(f"Checking status for payment: {payment_id}")
+    
+    try:
+        status = await nowpayments_client.get_payment_status(payment_id)
+        
+        if status:
+            payment_status = status.get("payment_status", "unknown")
+            logger.info(f"Payment {payment_id} status: {payment_status}")
+        else:
+            logger.warning(f"No status returned for payment: {payment_id}")
+        
+        return status
+        
+    except Exception as e:
+        logger.error(f"Error checking payment status for {payment_id}: {str(e)}", exc_info=True)
+        return None
 
 async def get_recent_payments(limit=10):
     """Get recent payments"""
