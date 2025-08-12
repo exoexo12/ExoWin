@@ -19,12 +19,19 @@ BOWLING_SCORING = {
 }
 
 async def bowling_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle the /bowling command"""
     # Handle both direct commands and callback queries
     if update.message:
-        pass
+        message = update.message
+        user_id = update.effective_user.id
     elif update.callback_query:
-        update.message = update.callback_query.message
-    """Handle the /bowling command"""
+        message = update.callback_query.message
+        user_id = update.callback_query.from_user.id
+    else:
+        return
+    
+    user = await get_user(user_id)
+    
     keyboard = [
         [
             InlineKeyboardButton("🎳 Solo Bowling", callback_data="bowling_solo"),
@@ -33,17 +40,19 @@ async def bowling_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [
             InlineKeyboardButton("🏆 Tournament", callback_data="bowling_tournament"),
             InlineKeyboardButton("📊 Scoring", callback_data="bowling_scoring")
+        ],
+        [
+            InlineKeyboardButton("🏆 Leaderboard", callback_data="leaderboard_bowling_all_time")
+        ],
+        [
+            InlineKeyboardButton("🔙 Back to Games", callback_data="menu_games")
         ]
     ]
-    # Handle both direct commands and callback queries
-    if update.message:
-        pass
-    elif update.callback_query:
-        update.message = update.callback_query.message
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(
-        "🎳 **BOWLING GAME**\n\n"
+    message_text = (
+        "🎳 **BOWLING GAME** 🎳\n\n"
+        f"💰 Balance: {format_money(user['balance'])}\n\n"
         "Roll for a strike!\n\n"
         "**Scoring:**\n"
         "🎳 Strike: 10x your bet\n"
@@ -51,10 +60,21 @@ async def bowling_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🟢 6-8 Pins: 3x your bet\n"
         "🟡 3-5 Pins: 2x your bet\n"
         "🔴 1-2 Pins: 1x your bet\n"
-        "❌ Gutter: Lose your bet",
-        reply_markup=reply_markup,
-        parse_mode='Markdown'
+        "❌ Gutter: Lose your bet"
     )
+    
+    if update.message:
+        await message.reply_text(
+            message_text,
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
+    elif update.callback_query:
+        await update.callback_query.edit_message_text(
+            message_text,
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
 
 async def bowling_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle bowling game callbacks"""

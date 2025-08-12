@@ -54,8 +54,10 @@ from src.menus import (
     deposit_menu_command, deposit_menu_callback,
     profile_menu_command, profile_menu_callback,
     settings_menu_command, settings_menu_callback,
-    bonuses_menu_command, bonuses_menu_callback
+    bonuses_menu_command, bonuses_menu_callback,
+    leaderboard_menu_command, leaderboard_menu_callback
 )
+from src.menus.deposit_menu import deposit_message_handler
 
 # Load environment variables
 load_dotenv()
@@ -160,21 +162,42 @@ async def help_command(update: Update, context):
 
 @handle_errors
 async def balance_command(update: Update, context):
-    """Show user balance when the command /balance is issued."""
-    from src.database import get_user
+    """Show user balance with deposit and withdraw options when the command /balance is issued."""
+    from src.database import get_user, can_withdraw
     from src.utils.formatting import format_money
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
     
     user_id = update.effective_user.id
     bot_logger.info(f"User {user_id} checked balance")
     user = await get_user(user_id)
+    can_withdraw_funds = await can_withdraw(user_id)
     
     balance_message = (
-        "💰 Your Balance 💰\n\n"
-        f"Current balance: {format_money(user['balance'])}\n\n"
-        "Use /wallet to manage your funds."
+        "💰 **Your Balance** 💰\n\n"
+        f"💵 Current balance: {format_money(user['balance'])}\n\n"
+        "What would you like to do?"
     )
     
-    await update.message.reply_text(balance_message)
+    # Create keyboard with deposit and withdraw buttons
+    keyboard = [
+        [
+            InlineKeyboardButton("💰 Deposit", callback_data="menu_deposit"),
+            InlineKeyboardButton("💸 Withdraw", callback_data="menu_withdraw")
+        ],
+        [
+            InlineKeyboardButton("🎮 Play Games", callback_data="menu_games")
+        ],
+        [
+            InlineKeyboardButton("🔙 Main Menu", callback_data="menu_main")
+        ]
+    ]
+    
+    # If user can't withdraw, show a note
+    if not can_withdraw_funds:
+        balance_message += f"\n💡 *You need at least $50 to withdraw*"
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text(balance_message, reply_markup=reply_markup, parse_mode='Markdown')
 
 @handle_errors
 async def stats_command(update: Update, context):
@@ -346,15 +369,13 @@ def main():
     
     # Menu callback handlers
     application.add_handler(CallbackQueryHandler(main_menu_callback, pattern="^menu_"))
-    application.add_handler(CallbackQueryHandler(games_menu_callback, pattern="^games_"))
     application.add_handler(CallbackQueryHandler(games_menu_callback, pattern="^game_"))
-    application.add_handler(CallbackQueryHandler(games_menu_callback, pattern="^animated_"))
-    application.add_handler(CallbackQueryHandler(games_menu_callback, pattern="^webapp_"))
     application.add_handler(CallbackQueryHandler(deposit_menu_callback, pattern="^deposit_"))
     application.add_handler(CallbackQueryHandler(deposit_menu_callback, pattern="^crypto_"))
     application.add_handler(CallbackQueryHandler(profile_menu_callback, pattern="^profile_"))
     application.add_handler(CallbackQueryHandler(settings_menu_callback, pattern="^settings_"))
     application.add_handler(CallbackQueryHandler(bonuses_menu_callback, pattern="^bonus_"))
+    application.add_handler(CallbackQueryHandler(leaderboard_menu_callback, pattern="^leaderboard_"))
     
     # Game callback query handlers
     # Telegram Animated Games

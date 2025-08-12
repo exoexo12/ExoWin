@@ -15,20 +15,22 @@ FOOTBALL_SCORING = {
     3: {"name": "Close", "multiplier": 2, "emoji": "🟡"},
     4: {"name": "Good Goal", "multiplier": 4, "emoji": "🟢"},
     5: {"name": "Perfect Goal", "multiplier": 8, "emoji": "⚽"}
-    # Handle both direct commands and callback queries
-    if update.message:
-        pass
-    elif update.callback_query:
-        update.message = update.callback_query.message
 }
 
 async def football_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle the /football command"""
     # Handle both direct commands and callback queries
     if update.message:
-        pass
+        message = update.message
+        user_id = update.effective_user.id
     elif update.callback_query:
-        update.message = update.callback_query.message
-    """Handle the /football command"""
+        message = update.callback_query.message
+        user_id = update.callback_query.from_user.id
+    else:
+        return
+    
+    user = await get_user(user_id)
+    
     keyboard = [
         [
             InlineKeyboardButton("⚽ Solo Penalty", callback_data="football_solo"),
@@ -37,22 +39,40 @@ async def football_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [
             InlineKeyboardButton("🏆 Tournament", callback_data="football_tournament"),
             InlineKeyboardButton("📊 Scoring", callback_data="football_scoring")
+        ],
+        [
+            InlineKeyboardButton("🏆 Leaderboard", callback_data="leaderboard_football_all_time")
+        ],
+        [
+            InlineKeyboardButton("🔙 Back to Games", callback_data="menu_games")
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(
-        "⚽ **FOOTBALL PENALTY**\n\n"
+    message_text = (
+        "⚽ **FOOTBALL PENALTY** ⚽\n\n"
+        f"💰 Balance: {format_money(user['balance'])}\n\n"
         "Take your penalty kick!\n\n"
         "**Scoring:**\n"
         "⚽ Perfect Goal: 8x your bet\n"
         "🟢 Good Goal: 4x your bet\n"
         "🟡 Close: 2x your bet\n"
         "🔴 Saved: 1x your bet\n"
-        "❌ Miss: Lose your bet",
-        reply_markup=reply_markup,
-        parse_mode='Markdown'
+        "❌ Miss: Lose your bet"
     )
+    
+    if update.message:
+        await message.reply_text(
+            message_text,
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
+    elif update.callback_query:
+        await update.callback_query.edit_message_text(
+            message_text,
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
 
 async def football_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle football game callbacks"""

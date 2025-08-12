@@ -10,6 +10,9 @@ active_dice_games = {}
 
 async def dice_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle the /dice command - Telegram animated dice game"""
+    user_id = update.effective_user.id if update.effective_user else update.callback_query.from_user.id
+    user = await get_user(user_id)
+    
     keyboard = [
         [
             InlineKeyboardButton("🎲 Solo Dice", callback_data="dice_solo"),
@@ -18,12 +21,19 @@ async def dice_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [
             InlineKeyboardButton("⚔️ Dice Duel", callback_data="dice_duel"),
             InlineKeyboardButton("📊 How to Play", callback_data="dice_help")
+        ],
+        [
+            InlineKeyboardButton("🏆 Leaderboard", callback_data="leaderboard_dice_all_time")
+        ],
+        [
+            InlineKeyboardButton("🔙 Back to Games", callback_data="menu_games")
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     message_text = (
-        "🎲 **ANIMATED DICE GAME**\n\n"
+        "🎲 **DICE GAME** 🎲\n\n"
+        f"💰 Balance: {format_money(user['balance'])}\n\n"
         "Real Telegram dice animation!\n\n"
         "**Game Modes:**\n"
         "🎲 **Solo**: Guess the number (1-6)\n"

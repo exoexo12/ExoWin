@@ -6,7 +6,7 @@ from src.utils.formatting import format_money
 from dotenv import load_dotenv
 
 load_dotenv()
-WEBAPP_URL = os.getenv("WEBAPP_URL", "https://work-1-yvxwuoonnfvrxtzn.prod-runtime.all-hands.dev")
+WEBAPP_URL = os.getenv("WEBAPP_URL", "https://exowin.bdgsoftware.cloud:12000")
 
 async def games_menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Display the games menu"""
@@ -18,13 +18,16 @@ async def show_games_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = await get_user(user_id)
     
     message = (
-        f"🎮 **GAMES** 🎮\n\n"
+        f"🎮 **GAMES MENU** 🎮\n\n"
         f"💰 Balance: {format_money(user['balance'])}\n\n"
-        f"Choose your game:"
+        f"Choose a game to play:\n"
+        f"• Animated Games: Play with Telegram animations\n"
+        f"• Web App Games: Interactive games with full UI"
     )
     
     # Unified games menu with all games in one place
     keyboard = [
+        # Animated Games Section
         [
             InlineKeyboardButton("🎲 Dice", callback_data="game_dice"),
             InlineKeyboardButton("🎯 Darts", callback_data="game_darts")
@@ -38,6 +41,11 @@ async def show_games_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton("⚽ Football", callback_data="game_football")
         ],
         [
+            InlineKeyboardButton("🪙 Coinflip", callback_data="game_coinflip"),
+            InlineKeyboardButton("🎡 Wheel", callback_data="game_wheel")
+        ],
+        # Web App Games Section
+        [
             InlineKeyboardButton("♠️ Blackjack", callback_data="game_blackjack"),
             InlineKeyboardButton("🎰 Roulette", callback_data="game_roulette")
         ],
@@ -46,19 +54,20 @@ async def show_games_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton("🏗️ Tower", callback_data="game_tower")
         ],
         [
-            InlineKeyboardButton("🎡 Wheel", callback_data="game_wheel"),
-            InlineKeyboardButton("🚀 Crash", callback_data="game_crash")
-        ],
-        [
-            InlineKeyboardButton("🟡 Plinko", callback_data="game_plinko"),
-            InlineKeyboardButton("🪙 Coinflip", callback_data="game_coinflip")
+            InlineKeyboardButton("🚀 Crash", callback_data="game_crash"),
+            InlineKeyboardButton("🟡 Plinko", callback_data="game_plinko")
         ],
         [
             InlineKeyboardButton("🎰 Lottery", callback_data="game_lottery"),
             InlineKeyboardButton("🃏 Poker", callback_data="game_poker")
         ],
+        # Leaderboard
         [
-            InlineKeyboardButton("🔙 Back", callback_data="menu_main")
+            InlineKeyboardButton("🏆 Leaderboards", callback_data="leaderboard_all_all_time")
+        ],
+        # Navigation
+        [
+            InlineKeyboardButton("🔙 Back to Main Menu", callback_data="menu_main")
         ]
     ]
     
@@ -69,79 +78,8 @@ async def show_games_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.callback_query.edit_message_text(message, reply_markup=reply_markup, parse_mode='Markdown')
 
-async def show_animated_games_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Show Telegram animated games menu"""
-    user_id = update.callback_query.from_user.id
-    user = await get_user(user_id)
-    
-    message = (
-        f"🎲 **ANIMATED GAMES** 🎲\n\n"
-        f"💰 Balance: {format_money(user['balance'])}\n\n"
-        f"Games with Telegram animations:\n"
-        f"• Play in chat with real animations\n"
-        f"• Multiplayer betting available\n"
-        f"• Instant results based on animation"
-    )
-    
-    keyboard = [
-        [
-            InlineKeyboardButton("🎲 Dice", callback_data="animated_dice"),
-            InlineKeyboardButton("🎯 Darts", callback_data="animated_darts")
-        ],
-        [
-            InlineKeyboardButton("🎰 Slots", callback_data="animated_slots"),
-            InlineKeyboardButton("🎳 Bowling", callback_data="animated_bowling")
-        ],
-        [
-            InlineKeyboardButton("🏀 Basketball", callback_data="animated_basketball"),
-            InlineKeyboardButton("⚽ Football", callback_data="animated_football")
-        ],
-        [
-            InlineKeyboardButton("🔙 Back to Games", callback_data="menu_games")
-        ]
-    ]
-    
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.callback_query.edit_message_text(message, reply_markup=reply_markup, parse_mode='Markdown')
-
-async def show_webapp_games_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Show web app games menu"""
-    user_id = update.callback_query.from_user.id
-    user = await get_user(user_id)
-    
-    message = (
-        f"🎮 **WEB APP GAMES** 🎮\n\n"
-        f"💰 Balance: {format_money(user['balance'])}\n\n"
-        f"Interactive games with full UI:\n"
-        f"• Advanced gameplay mechanics\n"
-        f"• Visual interfaces\n"
-        f"• Strategy-based games"
-    )
-    
-    keyboard = [
-        [
-            InlineKeyboardButton("♠️ Blackjack", callback_data="webapp_blackjack"),
-            InlineKeyboardButton("🎰 Roulette", callback_data="webapp_roulette")
-        ],
-        [
-            InlineKeyboardButton("💣 Mines", callback_data="webapp_mines"),
-            InlineKeyboardButton("🏗️ Tower", callback_data="webapp_tower")
-        ],
-        [
-            InlineKeyboardButton("🚀 Crash", callback_data="webapp_crash"),
-            InlineKeyboardButton("🟡 Plinko", callback_data="webapp_plinko")
-        ],
-        [
-            InlineKeyboardButton("🃏 Poker", callback_data="webapp_poker"),
-            InlineKeyboardButton("🎰 Lottery", callback_data="webapp_lottery")
-        ],
-        [
-            InlineKeyboardButton("🔙 Back to Games", callback_data="menu_games")
-        ]
-    ]
-    
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.callback_query.edit_message_text(message, reply_markup=reply_markup, parse_mode='Markdown')
+# Removed separate animated and webapp game menus to simplify the structure
+# All games are now accessed through the unified games menu
 
 async def games_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle games menu callback queries"""
@@ -156,7 +94,7 @@ async def games_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
     category = data[0]
     game_type = data[1]
     
-    # Route to specific games
+    # Route to specific games - simplified structure with only one path per game
     if category == "game":
         if game_type == "dice":
             from src.games.dice_animated import dice_command
@@ -198,59 +136,10 @@ async def games_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
             await show_lottery_webapp(update, context)
         elif game_type == "poker":
             await show_poker_webapp(update, context)
-    
-    # Legacy support for old callback patterns
-    elif category == "games":
-        if game_type == "animated":
-            await show_animated_games_menu(update, context)
-        elif game_type == "webapp":
-            await show_webapp_games_menu(update, context)
         elif game_type == "tournaments":
             await show_tournaments_menu(update, context)
         elif game_type == "challenges":
             await show_challenges_menu(update, context)
-    
-    # Route to animated games (legacy support)
-    elif category == "animated":
-        if game_type == "dice":
-            from src.games.dice_animated import dice_command
-            await dice_command(update, context)
-        elif game_type == "darts":
-            from src.games.darts_animated import darts_command
-            await darts_command(update, context)
-        elif game_type == "slots":
-            from src.games.slots_animated import slots_command
-            await slots_command(update, context)
-        elif game_type == "bowling":
-            from src.games.bowling_animated import bowling_command
-            await bowling_command(update, context)
-        elif game_type == "basketball":
-            from src.games.basketball_animated import basketball_command
-            await basketball_command(update, context)
-        elif game_type == "football":
-            from src.games.football_animated import football_command
-            await football_command(update, context)
-    
-    # Route to web app games (legacy support)
-    elif category == "webapp":
-        if game_type == "blackjack":
-            await show_blackjack_webapp(update, context)
-        elif game_type == "roulette":
-            await show_roulette_webapp(update, context)
-        elif game_type == "mines":
-            await show_mines_webapp(update, context)
-        elif game_type == "tower":
-            await show_tower_webapp(update, context)
-        elif game_type == "wheel":
-            from src.games.wheel_animated import wheel_command
-            await wheel_command(update, context)
-        elif game_type == "crash":
-            await show_crash_webapp(update, context)
-        elif game_type == "plinko":
-            await show_plinko_webapp(update, context)
-        elif game_type == "coinflip":
-            from src.games.coinflip_animated import coinflip_command
-            await coinflip_command(update, context)
 
 async def show_tournaments_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show tournaments menu"""
@@ -301,12 +190,17 @@ async def show_blackjack_webapp(update: Update, context: ContextTypes.DEFAULT_TY
     
     web_app_url = f"{WEBAPP_URL}/games/blackjack?user_id={user_id}"
     
+    leaderboard_url = f"{WEBAPP_URL}/leaderboard?user_id={user_id}&game_type=blackjack&period=all_time"
+    
     keyboard = [
         [
             InlineKeyboardButton("🎮 Play Blackjack", web_app=WebAppInfo(url=web_app_url))
         ],
         [
-            InlineKeyboardButton("🔙 Back", callback_data="games_webapp")
+            InlineKeyboardButton("🏆 Leaderboard", web_app=WebAppInfo(url=leaderboard_url))
+        ],
+        [
+            InlineKeyboardButton("🔙 Back to Games", callback_data="menu_games")
         ]
     ]
     
@@ -331,12 +225,17 @@ async def show_roulette_webapp(update: Update, context: ContextTypes.DEFAULT_TYP
     
     web_app_url = f"{WEBAPP_URL}/games/roulette?user_id={user_id}"
     
+    leaderboard_url = f"{WEBAPP_URL}/leaderboard?user_id={user_id}&game_type=roulette&period=all_time"
+    
     keyboard = [
         [
             InlineKeyboardButton("🎮 Play Roulette", web_app=WebAppInfo(url=web_app_url))
         ],
         [
-            InlineKeyboardButton("🔙 Back", callback_data="games_webapp")
+            InlineKeyboardButton("🏆 Leaderboard", web_app=WebAppInfo(url=leaderboard_url))
+        ],
+        [
+            InlineKeyboardButton("🔙 Back to Games", callback_data="menu_games")
         ]
     ]
     

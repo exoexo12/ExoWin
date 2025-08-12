@@ -15,7 +15,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Load environment variables
 load_dotenv()
 
-from webapp.sync_db import get_user, update_user_balance, record_transaction, record_game
+from webapp.sync_db import get_user, update_user_balance, record_transaction, record_game, get_leaderboard
 from src.utils.logger import webapp_logger
 from src.utils.validators import validator
 from src.utils.error_handler import GameError, InsufficientFundsError, InvalidBetError
@@ -63,6 +63,30 @@ def game_page(game_name):
     
     return render_template(f'games/{game_name}.html', user=user, user_id=user_id)
 
+@app.route('/leaderboard')
+def leaderboard_page():
+    """Serve leaderboard page"""
+    user_id = request.args.get('user_id')
+    game_type = request.args.get('game_type', 'all')
+    period = request.args.get('period', 'all_time')
+    
+    if not user_id:
+        return "User ID required", 400
+    
+    # Get user data and leaderboard
+    try:
+        user = get_user(int(user_id))
+        leaderboard_data = get_leaderboard(game_type, period)
+    except Exception as e:
+        return f"Error loading data: {str(e)}", 500
+    
+    return render_template('leaderboard.html', 
+                          user=user, 
+                          user_id=user_id, 
+                          leaderboard=leaderboard_data,
+                          game_type=game_type,
+                          period=period)
+
 @app.route('/api/user/<int:user_id>')
 def get_user_data(user_id):
     """Get user data API endpoint"""
@@ -78,6 +102,25 @@ def get_user_data(user_id):
                 'total_wins': user.get('total_wins', 0),
                 'total_losses': user.get('total_losses', 0)
             }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/leaderboard')
+def get_leaderboard_data():
+    """Get leaderboard data API endpoint"""
+    try:
+        game_type = request.args.get('game_type', 'all')
+        period = request.args.get('period', 'all_time')
+        limit = int(request.args.get('limit', 10))
+        
+        leaderboard_data = get_leaderboard(game_type, period, limit)
+        
+        return jsonify({
+            'success': True,
+            'leaderboard': leaderboard_data,
+            'game_type': game_type,
+            'period': period
         })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -658,7 +701,13 @@ def blackjack_stand():
         game_id = record_game(
             user_id, "blackjack", game.bet_amount,
             "win" if winnings > game.bet_amount else "loss" if winnings == 0 else "push",
-            winnings
+            winnings,
+            {
+                "player_hand": [str(card) for card in game.player_hand],
+                "dealer_hand": [str(card) for card in game.dealer_hand],
+                "player_score": game.get_player_score(),
+                "dealer_score": game.get_dealer_score()
+            }
         )
         
         # Update balance with winnings
@@ -977,7 +1026,12 @@ def mines_reveal():
         
         # If hit mine, record loss
         if result.get('hit_mine'):
-            record_game(user_id, 'mines', game.bet_amount, 0, 'lose')
+            record_game(user_id, 'mines', game.bet_amount, 'lose', 0, {
+                'mines_count': game.mines_count,
+                'revealed_tiles': game.revealed_tiles,
+                'mines_positions': game.mines_positions,
+                'hit_position': position
+            })
             clear_mines_game(user_id)
         
         return jsonify({
@@ -1008,7 +1062,12 @@ def mines_cashout():
         # Handle winnings
         new_balance = update_user_balance(user_id, game.winnings)
         record_transaction(user_id, game.winnings, 'mines_win', f'Mines cashout at {game.current_multiplier:.2f}x')
-        record_game(user_id, 'mines', game.bet_amount, game.winnings, 'win')
+        record_game(user_id, 'mines', game.bet_amount, 'win', game.winnings, {
+            'mines_count': game.mines_count,
+            'revealed_tiles': game.revealed_tiles,
+            'mines_positions': game.mines_positions,
+            'multiplier': game.current_multiplier
+        })
         
         result = {
             'success': True,
@@ -1374,4 +1433,16 @@ def static_files(filename):
 if __name__ == '__main__':
     port = int(os.getenv('FLASK_PORT', 12000))
     debug = os.getenv('DEBUG', 'False').lower() == 'true'
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    
+    # Check for SSL certificates
+    ssl_context = None
+    cert_path = os.getenv('SSL_CERT_PATH')
+    key_path = os.getenv('SSL_KEY_PATH')
+    
+    if cert_path and key_path and os.path.exists(cert_path) and os.path.exists(key_path):
+        ssl_context = (cert_path, key_path)
+        print(f"Running with SSL using {cert_path} and {key_path}")
+    else:
+        print("SSL certificates not found, running without SSL")
+    
+    app.run(host='0.0.0.0', port=port, debug=debug, ssl_context=ssl_context)
