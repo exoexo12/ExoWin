@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExoWin - Leaderboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background-color: #1e1e2f;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            padding: 20px;
+        }
+        .card {
+            background-color: #252547;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .card-header {
+            background-color: #1a1a38;
+            color: #ffffff;
+            border-bottom: 1px solid #333366;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 15px 20px;
+        }
+        .card-body {
+            padding: 20px;
+        }
+        .btn-primary {
+            background-color: #7366ff;
+            border-color: #7366ff;
+        }
+        .btn-primary:hover {
+            background-color: #5a4ee0;
+            border-color: #5a4ee0;
+        }
+        .btn-outline-primary {
+            color: #7366ff;
+            border-color: #7366ff;
+        }
+        .btn-outline-primary:hover {
+            background-color: #7366ff;
+            color: white;
+        }
+        .table {
+            color: #ffffff;
+        }
+        .table thead th {
+            border-bottom: 2px solid #333366;
+            color: #a8a8ff;
+        }
+        .table td, .table th {
+            border-top: 1px solid #333366;
+            padding: 12px 15px;
+        }
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .badge-success {
+            background-color: #00d27a;
+        }
+        .badge-danger {
+            background-color: #f55252;
+        }
+        .badge-warning {
+            background-color: #f5a623;
+        }
+        .badge-info {
+            background-color: #39afd1;
+        }
+        .user-rank {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .profit-positive {
+            color: #00d27a;
+        }
+        .profit-negative {
+            color: #f55252;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #7366ff;
+        }
+        .nav-pills .nav-link {
+            color: #a8a8ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2>🏆 Leaderboard</h2>
+                <div>
+                    <span class="badge badge-info">Balance: ${{ "%.2f"|format(user.balance) }}</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Game Type Selection -->
+                <div class="mb-4">
+                    <h5>Game:</h5>
+                    <div class="btn-group w-100" role="group">
+                        <a href="/leaderboard?user_id={{ user_id }}&game_type=all&period={{ period }}" class="btn btn-sm {% if game_type == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %}">All Games</a>
+                        <a href="/leaderboard?user_id={{ user_id }}&game_type=dice&period={{ period }}" class="btn btn-sm {% if game_type == 'dice' %}btn-primary{% else %}btn-outline-primary{% endif %}">🎲 Dice</a>
+                        <a href="/leaderboard?user_id={{ user_id }}&game_type=darts&period={{ period }}" class="btn btn-sm {% if game_type == 'darts' %}btn-primary{% else %}btn-outline-primary{% endif %}">🎯 Darts</a>
+                        <a href="/leaderboard?user_id={{ user_id }}&game_type=slots&period={{ period }}" class="btn btn-sm {% if game_type == 'slots' %}btn-primary{% else %}btn-outline-primary{% endif %}">🎰 Slots</a>
+                    </div>
+                    <div class="btn-group w-100 mt-2" role="group">
+                        <a href="/leaderboard?user_id={{ user_id }}&game_type=bowling&period={{ period }}" class="btn btn-sm {% if game_type == 'bowling' %}btn-primary{% else %}btn-outline-primary{% endif %}">🎳 Bowling</a>
+                        <a href="/leaderboard?user_id={{ user_id }}&game_type=basketball&period={{ period }}" class="btn btn-sm {% if game_type == 'basketball' %}btn-primary{% else %}btn-outline-primary{% endif %}">🏀 Basketball</a>
+                        <a href="/leaderboard?user_id={{ user_id }}&game_type=football&period={{ period }}" class="btn btn-sm {% if game_type == 'football' %}btn-primary{% else %}btn-outline-primary{% endif %}">⚽ Football</a>
+                        <a href="/leaderboard?user_id={{ user_id }}&game_type=coinflip&period={{ period }}" class="btn btn-sm {% if game_type == 'coinflip' %}btn-primary{% else %}btn-outline-primary{% endif %}">🪙 Coinflip</a>
+                    </div>
+                </div>
+                
+                <!-- Time Period Selection -->
+                <div class="mb-4">
+                    <h5>Time Period:</h5>
+                    <ul class="nav nav-pills nav-fill">
+                        <li class="nav-item">
+                            <a class="nav-link {% if period == 'daily' %}active{% endif %}" href="/leaderboard?user_id={{ user_id }}&game_type={{ game_type }}&period=daily">Today</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if period == 'weekly' %}active{% endif %}" href="/leaderboard?user_id={{ user_id }}&game_type={{ game_type }}&period=weekly">This Week</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if period == 'monthly' %}active{% endif %}" href="/leaderboard?user_id={{ user_id }}&game_type={{ game_type }}&period=monthly">This Month</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if period == 'all_time' %}active{% endif %}" href="/leaderboard?user_id={{ user_id }}&game_type={{ game_type }}&period=all_time">All Time</a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Leaderboard Table -->
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Player</th>
+                                <th>Profit</th>
+                                <th>Win/Loss</th>
+                                <th>Highest Win</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in leaderboard %}
+                            <tr {% if entry._id == user.user_id %}class="table-primary"{% endif %}>
+                                <td class="user-rank">{{ loop.index }}</td>
+                                <td>
+                                    {% if entry.username %}
+                                        @{{ entry.username }}
+                                    {% else %}
+                                        {{ entry.first_name }} {{ entry.last_name }}
+                                    {% endif %}
+                                </td>
+                                <td class="{% if entry.total_profit > 0 %}profit-positive{% else %}profit-negative{% endif %}">
+                                    ${{ "%.2f"|format(entry.total_profit) }}
+                                </td>
+                                <td>
+                                    <span class="badge badge-success">{{ entry.total_wins }}</span> / 
+                                    <span class="badge badge-danger">{{ entry.total_losses }}</span>
+                                </td>
+                                <td>${{ "%.2f"|format(entry.highest_win) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center">No data available for this period</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Back Button -->
+                <div class="mt-4 text-center">
+                    <button class="btn btn-primary" onclick="window.Telegram.WebApp.close()">Return to Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+        
+        // Set theme based on Telegram settings
+        if (tg.colorScheme === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
+    </script>
+</body>
+</html>

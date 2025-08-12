@@ -54,7 +54,8 @@ from src.menus import (
     deposit_menu_command, deposit_menu_callback,
     profile_menu_command, profile_menu_callback,
     settings_menu_command, settings_menu_callback,
-    bonuses_menu_command, bonuses_menu_callback
+    bonuses_menu_command, bonuses_menu_callback,
+    leaderboard_menu_command, leaderboard_menu_callback
 )
 
 # Load environment variables
@@ -346,15 +347,13 @@ def main():
     
     # Menu callback handlers
     application.add_handler(CallbackQueryHandler(main_menu_callback, pattern="^menu_"))
-    application.add_handler(CallbackQueryHandler(games_menu_callback, pattern="^games_"))
     application.add_handler(CallbackQueryHandler(games_menu_callback, pattern="^game_"))
-    application.add_handler(CallbackQueryHandler(games_menu_callback, pattern="^animated_"))
-    application.add_handler(CallbackQueryHandler(games_menu_callback, pattern="^webapp_"))
     application.add_handler(CallbackQueryHandler(deposit_menu_callback, pattern="^deposit_"))
     application.add_handler(CallbackQueryHandler(deposit_menu_callback, pattern="^crypto_"))
     application.add_handler(CallbackQueryHandler(profile_menu_callback, pattern="^profile_"))
     application.add_handler(CallbackQueryHandler(settings_menu_callback, pattern="^settings_"))
     application.add_handler(CallbackQueryHandler(bonuses_menu_callback, pattern="^bonus_"))
+    application.add_handler(CallbackQueryHandler(leaderboard_menu_callback, pattern="^leaderboard_"))
     
     # Game callback query handlers
     # Telegram Animated Games

@@ -29,3 +29,10 @@ from src.database.db import (
     transactions_collection,
     games_collection
 )
+
+# Import leaderboard functions
+from src.database.leaderboard import (
+    get_game_leaderboard,
+    get_overall_leaderboard,
+    get_user_ranking
+)
