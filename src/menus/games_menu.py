@@ -159,21 +159,29 @@ async def games_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
     # Route to specific games
     if category == "game":
         if game_type == "dice":
+            # Create a message object from the callback query for animated games
+            update.message = update.callback_query.message
+
             from src.games.dice_animated import dice_command
             await dice_command(update, context)
         elif game_type == "darts":
+            update.message = update.callback_query.message
             from src.games.darts_animated import darts_command
             await darts_command(update, context)
         elif game_type == "slots":
+            update.message = update.callback_query.message
             from src.games.slots_animated import slots_command
             await slots_command(update, context)
         elif game_type == "bowling":
+            update.message = update.callback_query.message
             from src.games.bowling_animated import bowling_command
             await bowling_command(update, context)
         elif game_type == "basketball":
+            update.message = update.callback_query.message
             from src.games.basketball_animated import basketball_command
             await basketball_command(update, context)
         elif game_type == "football":
+            update.message = update.callback_query.message
             from src.games.football_animated import football_command
             await football_command(update, context)
         elif game_type == "blackjack":
@@ -185,6 +193,7 @@ async def games_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
         elif game_type == "tower":
             await show_tower_webapp(update, context)
         elif game_type == "wheel":
+            update.message = update.callback_query.message
             from src.games.wheel_animated import wheel_command
             await wheel_command(update, context)
         elif game_type == "crash":
@@ -192,6 +201,7 @@ async def games_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
         elif game_type == "plinko":
             await show_plinko_webapp(update, context)
         elif game_type == "coinflip":
+            update.message = update.callback_query.message
             from src.games.coinflip_animated import coinflip_command
             await coinflip_command(update, context)
         elif game_type == "lottery":
@@ -213,21 +223,35 @@ async def games_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
     # Route to animated games (legacy support)
     elif category == "animated":
         if game_type == "dice":
+            # Create a message object from the callback query for animated games
+            update.message = update.callback_query.message
+
+            update.message = update.callback_query.message
             from src.games.dice_animated import dice_command
             await dice_command(update, context)
         elif game_type == "darts":
+            update.message = update.callback_query.message
+            update.message = update.callback_query.message
             from src.games.darts_animated import darts_command
             await darts_command(update, context)
         elif game_type == "slots":
+            update.message = update.callback_query.message
+            update.message = update.callback_query.message
             from src.games.slots_animated import slots_command
             await slots_command(update, context)
         elif game_type == "bowling":
+            update.message = update.callback_query.message
+            update.message = update.callback_query.message
             from src.games.bowling_animated import bowling_command
             await bowling_command(update, context)
         elif game_type == "basketball":
+            update.message = update.callback_query.message
+            update.message = update.callback_query.message
             from src.games.basketball_animated import basketball_command
             await basketball_command(update, context)
         elif game_type == "football":
+            update.message = update.callback_query.message
+            update.message = update.callback_query.message
             from src.games.football_animated import football_command
             await football_command(update, context)
     
@@ -242,6 +266,7 @@ async def games_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
         elif game_type == "tower":
             await show_tower_webapp(update, context)
         elif game_type == "wheel":
+            update.message = update.callback_query.message
             from src.games.wheel_animated import wheel_command
             await wheel_command(update, context)
         elif game_type == "crash":
@@ -249,6 +274,7 @@ async def games_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
         elif game_type == "plinko":
             await show_plinko_webapp(update, context)
         elif game_type == "coinflip":
+            update.message = update.callback_query.message
             from src.games.coinflip_animated import coinflip_command
             await coinflip_command(update, context)
 
