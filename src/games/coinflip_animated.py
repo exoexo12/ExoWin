@@ -10,6 +10,18 @@ active_coinflip_games = {}
 
 async def coinflip_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle the coinflip command - Telegram animated coin game"""
+    # Handle both direct commands and callback queries
+    if update.message:
+        message = update.message
+        user_id = update.effective_user.id
+    elif update.callback_query:
+        message = update.callback_query.message
+        user_id = update.callback_query.from_user.id
+    else:
+        return
+    
+    user = await get_user(user_id)
+    
     keyboard = [
         [
             InlineKeyboardButton("🪙 Solo Flip", callback_data="coinflip_solo"),
@@ -18,21 +30,39 @@ async def coinflip_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [
             InlineKeyboardButton("⚔️ Coin Duel", callback_data="coinflip_duel"),
             InlineKeyboardButton("📊 How to Play", callback_data="coinflip_help")
+        ],
+        [
+            InlineKeyboardButton("🏆 Leaderboard", callback_data="leaderboard_coinflip_all_time")
+        ],
+        [
+            InlineKeyboardButton("🔙 Back to Games", callback_data="menu_games")
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(
-        "🪙 **ANIMATED COINFLIP GAME**\n\n"
+    message_text = (
+        "🪙 **COINFLIP GAME** 🪙\n\n"
+        f"💰 Balance: {format_money(user['balance'])}\n\n"
         "Real Telegram coin animation!\n\n"
         "**Game Modes:**\n"
         "🪙 **Solo**: Choose heads or tails\n"
         "👥 **Multiplayer**: Everyone bets, winner takes pot\n"
         "⚔️ **Duel**: Challenge another player\n\n"
-        "🏆 **Win 2x your bet** for correct guess!",
-        reply_markup=reply_markup,
-        parse_mode='Markdown'
+        "🏆 **Win 2x your bet** for correct guess!"
     )
+    
+    if update.message:
+        await message.reply_text(
+            message_text,
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
+    elif update.callback_query:
+        await update.callback_query.edit_message_text(
+            message_text,
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
 
 async def coinflip_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle coinflip game callbacks"""

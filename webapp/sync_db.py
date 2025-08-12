@@ -149,7 +149,7 @@ def record_transaction(user_id: int, amount: float, transaction_type: str, game_
         db_logger.error(f"Database error in record_transaction: {e}")
         raise
 
-def record_game(user_id: int, game_type: str, bet_amount: float, outcome: str, winnings: float) -> str:
+def record_game(user_id: int, game_type: str, bet_amount: float, outcome: str, winnings: float, game_data: Dict[str, Any] = None) -> str:
     """Record a game result"""
     try:
         game = {
@@ -158,10 +158,74 @@ def record_game(user_id: int, game_type: str, bet_amount: float, outcome: str, w
             "bet_amount": bet_amount,
             "outcome": outcome,
             "winnings": winnings,
-            "timestamp": datetime.now()
+            "profit": winnings - bet_amount,
+            "is_win": winnings > bet_amount,
+            "game_data": game_data or {},
+            "created_at": datetime.now()
         }
         result = games_collection.insert_one(game)
         return str(result.inserted_id)
     except Exception as e:
         db_logger.error(f"Database error in record_game: {e}")
         raise
+
+def get_leaderboard(game_type: str = "all", period: str = "all_time", limit: int = 10):
+    """Get leaderboard data for a specific game and time period"""
+    try:
+        db_logger.debug(f"Getting leaderboard for {game_type} ({period})")
+        
+        # Define time filter based on period
+        time_filter = {}
+        now = datetime.now()
+        if period == "daily":
+            # Today only
+            start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            time_filter = {"created_at": {"$gte": start_of_day}}
+        elif period == "weekly":
+            # Last 7 days
+            start_of_week = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            start_of_week = start_of_week.replace(day=start_of_week.day - start_of_week.weekday())
+            time_filter = {"created_at": {"$gte": start_of_week}}
+        elif period == "monthly":
+            # Current month
+            start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            time_filter = {"created_at": {"$gte": start_of_month}}
+        
+        # Define game filter
+        game_filter = {}
+        if game_type != "all":
+            game_filter = {"game_type": game_type}
+        
+        # Combine filters
+        query_filter = {**game_filter, **time_filter}
+        
+        # Aggregate to get top players
+        pipeline = [
+            {"$match": query_filter},
+            {"$group": {
+                "_id": "$user_id",
+                "total_profit": {"$sum": "$profit"},
+                "total_bets": {"$sum": 1},
+                "total_wins": {"$sum": {"$cond": [{"$gt": ["$winnings", "$bet_amount"]}, 1, 0]}},
+                "total_losses": {"$sum": {"$cond": [{"$lt": ["$winnings", "$bet_amount"]}, 1, 0]}},
+                "highest_win": {"$max": "$winnings"},
+                "total_wagered": {"$sum": "$bet_amount"}
+            }},
+            {"$sort": {"total_profit": -1}},
+            {"$limit": limit}
+        ]
+        
+        leaderboard = list(games_collection.aggregate(pipeline))
+        
+        # Get user details for each leaderboard entry
+        for entry in leaderboard:
+            user = users_collection.find_one({"user_id": entry["_id"]})
+            if user:
+                entry["username"] = user.get("username", "Unknown")
+                entry["first_name"] = user.get("first_name", "Unknown")
+                entry["last_name"] = user.get("last_name", "")
+        
+        return leaderboard
+    except Exception as e:
+        db_logger.error(f"Error getting leaderboard: {e}")
+        return []

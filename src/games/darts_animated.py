@@ -19,12 +19,19 @@ DARTS_SCORING = {
 }
 
 async def darts_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle the /darts command"""
     # Handle both direct commands and callback queries
     if update.message:
-        pass
+        message = update.message
+        user_id = update.effective_user.id
     elif update.callback_query:
-        update.message = update.callback_query.message
-    """Handle the /darts command"""
+        message = update.callback_query.message
+        user_id = update.callback_query.from_user.id
+    else:
+        return
+    
+    user = await get_user(user_id)
+    
     keyboard = [
         [
             InlineKeyboardButton("🎯 Solo Darts", callback_data="darts_solo"),
@@ -33,12 +40,19 @@ async def darts_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [
             InlineKeyboardButton("🏆 Tournament", callback_data="darts_tournament"),
             InlineKeyboardButton("📊 Scoring", callback_data="darts_scoring")
+        ],
+        [
+            InlineKeyboardButton("🏆 Leaderboard", callback_data="leaderboard_darts_all_time")
+        ],
+        [
+            InlineKeyboardButton("🔙 Back to Games", callback_data="menu_games")
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(
-        "🎯 **DARTS GAME**\n\n"
+    message_text = (
+        "🎯 **DARTS GAME** 🎯\n\n"
+        f"💰 Balance: {format_money(user['balance'])}\n\n"
         "Aim for the bullseye!\n\n"
         "**Scoring:**\n"
         "🎯 Bullseye: 10x your bet\n"
@@ -46,16 +60,21 @@ async def darts_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🟡 Double Ring: 3x your bet\n"
         "🔵 Inner Ring: 2x your bet\n"
         "⚪ Outer Ring: 1x your bet\n"
-        "❌ Miss: Lose your bet",
-        reply_markup=reply_markup,
-        parse_mode='Markdown'
+        "❌ Miss: Lose your bet"
     )
-
-    # Handle both direct commands and callback queries
+    
     if update.message:
-        pass
+        await message.reply_text(
+            message_text,
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
     elif update.callback_query:
-        update.message = update.callback_query.message
+        await update.callback_query.edit_message_text(
+            message_text,
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
 async def darts_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle darts game callbacks"""
     query = update.callback_query

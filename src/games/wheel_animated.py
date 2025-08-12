@@ -20,6 +20,18 @@ WHEEL_SEGMENTS = {
 
 async def wheel_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle the /wheel command"""
+    # Handle both direct commands and callback queries
+    if update.message:
+        message = update.message
+        user_id = update.effective_user.id
+    elif update.callback_query:
+        message = update.callback_query.message
+        user_id = update.callback_query.from_user.id
+    else:
+        return
+    
+    user = await get_user(user_id)
+    
     keyboard = [
         [
             InlineKeyboardButton("🎡 Solo Wheel", callback_data="wheel_solo"),
@@ -27,12 +39,19 @@ async def wheel_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
         [
             InlineKeyboardButton("📊 Wheel Info", callback_data="wheel_info")
+        ],
+        [
+            InlineKeyboardButton("🏆 Leaderboard", callback_data="leaderboard_wheel_all_time")
+        ],
+        [
+            InlineKeyboardButton("🔙 Back to Games", callback_data="menu_games")
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(
-        "🎡 **WHEEL OF FORTUNE**\n\n"
+    message_text = (
+        "🎡 **WHEEL OF FORTUNE** 🎡\n\n"
+        f"💰 Balance: {format_money(user['balance'])}\n\n"
         "Spin the wheel and win big!\n\n"
         "**Segments:**\n"
         "🔴 Red: 2x (40% chance)\n"
@@ -40,10 +59,21 @@ async def wheel_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🟢 Green: 5x (15% chance)\n"
         "🔵 Blue: 10x (10% chance)\n"
         "🟣 Purple: 20x (7% chance)\n"
-        "⚫ Black: 50x (3% chance)",
-        reply_markup=reply_markup,
-        parse_mode='Markdown'
+        "⚫ Black: 50x (3% chance)"
     )
+    
+    if update.message:
+        await message.reply_text(
+            message_text,
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
+    elif update.callback_query:
+        await update.callback_query.edit_message_text(
+            message_text,
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
 
 async def wheel_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle wheel game callbacks"""

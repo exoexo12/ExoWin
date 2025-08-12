@@ -29,6 +29,9 @@ async def main_menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton("🎁 Bonuses", callback_data="menu_bonuses")
         ],
         [
+            InlineKeyboardButton("🏆 Leaderboards", callback_data="menu_leaderboard")
+        ],
+        [
             InlineKeyboardButton("⚙️ Settings", callback_data="menu_settings")
         ]
     ]
@@ -75,6 +78,10 @@ async def main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
     elif action == "settings":
         from .settings_menu import show_settings_menu
         await show_settings_menu(update, context)
+    
+    elif action == "leaderboard":
+        from .leaderboard_menu import show_leaderboard_menu
+        await show_leaderboard_menu(update, context)
     
     elif action == "main":
         # Return to main menu

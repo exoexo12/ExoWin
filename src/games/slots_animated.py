@@ -23,19 +23,20 @@ SLOT_PAYOUTS = {
     (1, 2, 3): {"multiplier": 5, "name": "🍋🍊🍇 Fruit Mix"},
     (4, 5, 6): {"multiplier": 8, "name": "🍒🔔💎 Premium Mix"}
 }
-    # Handle both direct commands and callback queries
-    if update.message:
-        pass
-    elif update.callback_query:
-        update.message = update.callback_query.message
-
 async def slots_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle the /slots command"""
     # Handle both direct commands and callback queries
     if update.message:
-        pass
+        message = update.message
+        user_id = update.effective_user.id
     elif update.callback_query:
-        update.message = update.callback_query.message
-    """Handle the /slots command"""
+        message = update.callback_query.message
+        user_id = update.callback_query.from_user.id
+    else:
+        return
+    
+    user = await get_user(user_id)
+    
     keyboard = [
         [
             InlineKeyboardButton("🎰 Solo Slots", callback_data="slots_solo"),
@@ -43,20 +44,38 @@ async def slots_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
         [
             InlineKeyboardButton("📊 Paytable", callback_data="slots_paytable")
+        ],
+        [
+            InlineKeyboardButton("🏆 Leaderboard", callback_data="leaderboard_slots_all_time")
+        ],
+        [
+            InlineKeyboardButton("🔙 Back to Games", callback_data="menu_games")
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(
-        "🎰 **SLOT MACHINE**\n\n"
+    message_text = (
+        "🎰 **SLOT MACHINE** 🎰\n\n"
+        f"💰 Balance: {format_money(user['balance'])}\n\n"
         "Pull the lever and win big!\n\n"
         "**Game Modes:**\n"
         "🎰 **Solo**: Play against the house\n"
         "🏆 **Tournament**: Compete with others\n\n"
-        "💎 **JACKPOT**: 777x multiplier!",
-        reply_markup=reply_markup,
-        parse_mode='Markdown'
+        "💎 **JACKPOT**: 777x multiplier!"
     )
+    
+    if update.message:
+        await message.reply_text(
+            message_text,
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
+    elif update.callback_query:
+        await update.callback_query.edit_message_text(
+            message_text,
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
 
 async def slots_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle slots game callbacks"""
