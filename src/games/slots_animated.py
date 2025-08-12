@@ -4,6 +4,10 @@
 # Modified to handle callback queries
 # Modified to handle callback queries
 # Modified to handle callback queries
+# Modified to handle callback queries
+# Modified to handle callback queries
+# Modified to handle callback queries
+# Modified to handle callback queries
 import random
 import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -62,12 +66,20 @@ SLOT_PAYOUTS = {
 # Handle both direct commands and callback queries from games menuasync def slots_command_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):    if update.callback_query:        update.message = update.callback_query.message        await update.callback_query.answer()    return await slots_command(update, context)
 # Handle both direct commands and callback queries from games menuasync def slots_command_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):    if update.callback_query:        update.message = update.callback_query.message        await update.callback_query.answer()    return await slots_command(update, context)
 # Handle both direct commands and callback queries from games menuasync def slots_command_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):    if update.callback_query:        update.message = update.callback_query.message        await update.callback_query.answer()    return await slots_command(update, context)
+# Handle both direct commands and callback queries from games menuasync def slots_command_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):    if update.callback_query:        update.message = update.callback_query.message        await update.callback_query.answer()    return await slots_command(update, context)
+# Handle both direct commands and callback queries from games menuasync def slots_command_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):    if update.callback_query:        update.message = update.callback_query.message        await update.callback_query.answer()    return await slots_command(update, context)
+# Handle both direct commands and callback queries from games menuasync def slots_command_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):    if update.callback_query:        update.message = update.callback_query.message        await update.callback_query.answer()    return await slots_command(update, context)
+# Handle both direct commands and callback queries from games menuasync def slots_command_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):    if update.callback_query:        update.message = update.callback_query.message        await update.callback_query.answer()    return await slots_command(update, context)
 async def slots_command_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query:
         update.message = update.callback_query.message
         await update.callback_query.answer()
     return await slots_command(update, context)
 
+# Handle both direct commands and callback queries from games menuasync def slots_command_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):    if update.callback_query:        update.message = update.callback_query.message        await update.callback_query.answer()    return await slots_command(update, context)
+# Handle both direct commands and callback queries from games menuasync def slots_command_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):    if update.callback_query:        update.message = update.callback_query.message        await update.callback_query.answer()    return await slots_command(update, context)
+# Handle both direct commands and callback queries from games menuasync def slots_command_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):    if update.callback_query:        update.message = update.callback_query.message        await update.callback_query.answer()    return await slots_command(update, context)
+# Handle both direct commands and callback queries from games menuasync def slots_command_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):    if update.callback_query:        update.message = update.callback_query.message        await update.callback_query.answer()    return await slots_command(update, context)
 # Handle both direct commands and callback queries from games menuasync def slots_command_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):    if update.callback_query:        update.message = update.callback_query.message        await update.callback_query.answer()    return await slots_command(update, context)
 # Handle both direct commands and callback queries from games menuasync def slots_command_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):    if update.callback_query:        update.message = update.callback_query.message        await update.callback_query.answer()    return await slots_command(update, context)
 # Handle both direct commands and callback queries from games menuasync def slots_command_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):    if update.callback_query:        update.message = update.callback_query.message        await update.callback_query.answer()    return await slots_command(update, context)
